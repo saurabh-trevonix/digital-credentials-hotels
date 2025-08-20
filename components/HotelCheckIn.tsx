@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { CheckCircle, Clock, Smartphone, Shield, User, MapPin, Sparkles, Wifi, Scan, Building2 } from 'lucide-react';
+import { CheckCircle, Clock, Smartphone, Shield, User, MapPin, Sparkles, Wifi, Scan, Building2, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getPingOneAccessToken, generateQRCode } from '@/lib/api';
+import { showToast } from './ui/toast';
 
 interface CheckInStep {
   id: number;
@@ -19,6 +21,8 @@ export function HotelCheckIn() {
   const [isScanned, setIsScanned] = useState(false);
   const [verificationData, setVerificationData] = useState<any>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isGeneratingQR, setIsGeneratingQR] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const steps: CheckInStep[] = [
     { id: 1, title: 'Generate QR Code', status: currentStep >= 1 ? 'completed' : 'pending', actor: 'Hotel System' },
@@ -46,6 +50,52 @@ export function HotelCheckIn() {
       return () => clearTimeout(timer);
     }
   }, [isScanned, currentStep]);
+
+  const handleGenerateQR = async () => {
+    setIsGeneratingQR(true);
+    
+    try {
+      // Step 1: Get access token from PingOne
+      console.log('Getting access token from PingOne...');
+      const tokenResponse = await getPingOneAccessToken();
+      setAccessToken(tokenResponse.access_token);
+      
+      console.log('Successfully obtained access token:', {
+        token_type: tokenResponse.token_type,
+        expires_in: tokenResponse.expires_in,
+        scope: tokenResponse.scope
+      });
+      
+      showToast('success', 'Successfully authenticated with PingOne!', 4000);
+      
+      // Step 2: Generate QR code (placeholder for now)
+      console.log('Generating QR code with access token...');
+      const qrData = await generateQRCode(tokenResponse.access_token);
+      
+      console.log('QR code generated successfully:', qrData);
+      showToast('success', 'QR Code generated successfully!', 4000);
+      
+      // Move to next step
+      setCurrentStep(2);
+      
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      showToast('error', `Failed to generate QR code: ${errorMessage}`, 6000);
+      
+      // Log detailed error for debugging
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+      }
+    } finally {
+      setIsGeneratingQR(false);
+    }
+  };
 
   const handleScanQR = () => {
     setIsScanned(true);
@@ -131,6 +181,7 @@ export function HotelCheckIn() {
                   setCurrentStep(1);
                   setIsScanned(false);
                   setVerificationData(null);
+                  setAccessToken(null);
                 }}
                 className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
               >
@@ -215,13 +266,39 @@ export function HotelCheckIn() {
                           <h3 className="text-2xl font-bold mb-3">Welcome to Digital Check-in</h3>
                           <p className="text-blue-200 text-lg mb-6">Click the button below to generate your secure QR code and begin the check-in process</p>
                         </div>
+                        
+                        {accessToken && (
+                          <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 mb-4">
+                            <p className="text-green-300 text-sm">
+                              ✅ PingOne authentication successful
+                            </p>
+                          </div>
+                        )}
+                        
                         <Button 
-                          onClick={() => setCurrentStep(2)}
-                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 text-lg font-semibold"
+                          onClick={handleGenerateQR}
+                          disabled={isGeneratingQR}
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <Sparkles className="w-6 h-6 mr-3" />
-                          Generate QR Code
+                          {isGeneratingQR ? (
+                            <>
+                              <Loader2 className="w-6 h-6 mr-3 animate-spin" />
+                              Authenticating...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-6 h-6 mr-3" />
+                              Generate QR Code
+                            </>
+                          )}
                         </Button>
+                        
+                        {isGeneratingQR && (
+                          <div className="text-blue-200 text-sm">
+                            <p>🔐 Authenticating with PingOne...</p>
+                            <p>📱 Generating secure QR code...</p>
+                          </div>
+                        )}
                       </motion.div>
                     )}
 
