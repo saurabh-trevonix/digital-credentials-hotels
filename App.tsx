@@ -78,35 +78,33 @@ export default function App() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="grid md:grid-cols-3 gap-8 mb-20"
         >
-          {[
+                    {[
             {
-              icon: <Hotel className="w-8 h-8" />,
+              icon: <Hotel className="w-8 h-8 text-white" />,
               title: "Hotel Kiosk System",
               description: "Professional check-in terminal with QR code generation and real-time verification",
               gradient: "from-blue-500 to-cyan-500",
-              bgGradient: "from-blue-500/10 to-cyan-500/10"
+              bgGradient: "from-blue-500/20 to-cyan-500/20"
             },
             {
-              icon: <Smartphone className="w-8 h-8" />,
+              icon: <Smartphone className="w-8 h-8 text-white" />,
               title: "NatWest Digital Wallet",
               description: "Secure mobile app with biometric authentication and credential management",
               gradient: "from-purple-500 to-pink-500",
-              bgGradient: "from-purple-500/10 to-pink-500/10"
+              bgGradient: "from-purple-500/20 to-pink-500/20"
             },
             {
-              icon: <Users className="w-8 h-8" />,
+              icon: <Users className="w-8 h-8 text-white" />,
               title: "Seamless Experience",
               description: "Contactless, secure, and lightning-fast check-in process for modern travelers",
               gradient: "from-emerald-500 to-teal-500",
-              bgGradient: "from-emerald-500/10 to-teal-500/10"
+              bgGradient: "from-emerald-500/20 to-teal-500/20"
             }
           ].map((feature, index) => (
             <Card key={index} className="bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
               <CardHeader className="text-center pb-4">
-                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${feature.bgGradient} flex items-center justify-center border border-white/20`}>
-                  <div className={`text-transparent bg-gradient-to-r ${feature.gradient} bg-clip-text`}>
-                    {feature.icon}
-                  </div>
+                <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${feature.bgGradient} flex items-center justify-center border border-white/20 shadow-lg`}>
+                  {feature.icon}
                 </div>
                 <CardTitle className="text-white text-xl">{feature.title}</CardTitle>
                 <CardDescription className="text-gray-300 leading-relaxed">
