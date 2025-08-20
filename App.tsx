@@ -69,6 +69,29 @@ export default function App() {
               Privacy First
             </Badge>
           </div>
+
+          {/* CTA Section */}
+          <div className="text-center">
+            <h3 className="text-3xl text-white mb-8">Ready to Experience the Future?</h3>
+            <div className="flex flex-col sm:flex-row justify-center gap-6">
+              <Button 
+                onClick={() => setActiveView('hotel')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
+              >
+                <Monitor className="w-5 h-5 mr-2" />
+                Try Hotel System
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button 
+                onClick={() => setActiveView('mobile')}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-xl backdrop-blur-md transition-all duration-300 hover:scale-105"
+              >
+                <Smartphone className="w-5 h-5 mr-2" />
+                Mobile Experience
+              </Button>
+            </div>
+          </div>
         </motion.div>
 
         {/* Feature Cards */}
@@ -185,35 +208,7 @@ export default function App() {
           </Card>
         </motion.div>
 
-        {/* CTA Section */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="text-center"
-        >
-          <h3 className="text-3xl text-white mb-8">Ready to Experience the Future?</h3>
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <Button 
-              onClick={() => setActiveView('hotel')}
-              size="lg"
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105"
-            >
-              <Monitor className="w-5 h-5 mr-2" />
-              Try Hotel System
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-            <Button 
-              onClick={() => setActiveView('mobile')}
-              variant="outline"
-              size="lg"
-              className="border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-xl backdrop-blur-md transition-all duration-300 hover:scale-105"
-            >
-              <Smartphone className="w-5 h-5 mr-2" />
-              Mobile Experience
-            </Button>
-          </div>
-        </motion.div>
+
       </div>
     </div>
   );

@@ -21,15 +21,16 @@ export function HotelCheckIn() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const steps: CheckInStep[] = [
-    { id: 1, title: 'QR Code Display', status: 'completed', actor: 'Hotel System' },
-    { id: 2, title: 'QR Code Scan', status: isScanned ? 'completed' : currentStep === 2 ? 'active' : 'pending', actor: 'Guest' },
-    { id: 3, title: 'App Redirect', status: currentStep >= 3 ? 'completed' : 'pending', actor: 'NatWest App' },
-    { id: 4, title: 'User Login', status: currentStep >= 4 ? 'completed' : 'pending', actor: 'Guest' },
-    { id: 5, title: 'Biometric Verification', status: currentStep >= 5 ? 'completed' : 'pending', actor: 'Daon' },
-    { id: 6, title: 'VC Selection', status: currentStep >= 6 ? 'completed' : 'pending', actor: 'Guest' },
-    { id: 7, title: 'Data Sharing', status: currentStep >= 7 ? 'completed' : 'pending', actor: 'NatWest App' },
-    { id: 8, title: 'VC Verification', status: currentStep >= 8 ? 'completed' : 'pending', actor: 'Hotel System' },
-    { id: 9, title: 'Check-in Complete', status: currentStep >= 9 ? 'completed' : 'pending', actor: 'Hotel System' }
+    { id: 1, title: 'Generate QR Code', status: currentStep >= 1 ? 'completed' : 'pending', actor: 'Hotel System' },
+    { id: 2, title: 'QR Code Display', status: currentStep >= 2 ? 'completed' : 'pending', actor: 'Hotel System' },
+    { id: 3, title: 'QR Code Scan', status: isScanned ? 'completed' : currentStep === 3 ? 'active' : 'pending', actor: 'Guest' },
+    { id: 4, title: 'App Redirect', status: currentStep >= 4 ? 'completed' : 'pending', actor: 'NatWest App' },
+    { id: 5, title: 'User Login', status: currentStep >= 5 ? 'completed' : 'pending', actor: 'Guest' },
+    { id: 6, title: 'Biometric Verification', status: currentStep >= 6 ? 'completed' : 'pending', actor: 'Daon' },
+    { id: 7, title: 'VC Selection', status: currentStep >= 7 ? 'completed' : 'pending', actor: 'Guest' },
+    { id: 8, title: 'Data Sharing', status: currentStep >= 8 ? 'completed' : 'pending', actor: 'NatWest App' },
+    { id: 9, title: 'VC Verification', status: currentStep >= 9 ? 'completed' : 'pending', actor: 'Hotel System' },
+    { id: 10, title: 'Check-in Complete', status: currentStep >= 10 ? 'completed' : 'pending', actor: 'Hotel System' }
   ];
 
   useEffect(() => {
@@ -38,9 +39,9 @@ export function HotelCheckIn() {
   }, []);
 
   useEffect(() => {
-    if (isScanned && currentStep === 2) {
+    if (isScanned && currentStep === 3) {
       const timer = setTimeout(() => {
-        setCurrentStep(3);
+        setCurrentStep(4);
       }, 1000);
       return () => clearTimeout(timer);
     }
@@ -51,10 +52,10 @@ export function HotelCheckIn() {
   };
 
   const handleNextStep = () => {
-    if (currentStep < 9) {
+    if (currentStep < 10) {
       setCurrentStep(currentStep + 1);
       
-      if (currentStep === 6) {
+      if (currentStep === 7) {
         setVerificationData({
           name: 'John Smith',
           address: '123 Main Street, London, UK',
@@ -71,7 +72,7 @@ export function HotelCheckIn() {
     return <div className="w-5 h-5 rounded-full border-2 border-gray-300 bg-gray-100" />;
   };
 
-  if (currentStep === 9) {
+  if (currentStep === 10) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 flex items-center justify-center p-6">
         <motion.div
@@ -201,6 +202,31 @@ export function HotelCheckIn() {
                   <AnimatePresence mode="wait">
                     {currentStep === 1 && (
                       <motion.div
+                        key="step0"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="text-center space-y-6"
+                      >
+                        <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
+                          <Scan className="w-16 h-16 text-white" />
+                        </div>
+                        <div className="text-white">
+                          <h3 className="text-2xl font-bold mb-3">Welcome to Digital Check-in</h3>
+                          <p className="text-blue-200 text-lg mb-6">Click the button below to generate your secure QR code and begin the check-in process</p>
+                        </div>
+                        <Button 
+                          onClick={() => setCurrentStep(2)}
+                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-12 py-4 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 text-lg font-semibold"
+                        >
+                          <Sparkles className="w-6 h-6 mr-3" />
+                          Generate QR Code
+                        </Button>
+                      </motion.div>
+                    )}
+
+                    {currentStep === 2 && (
+                      <motion.div
                         key="step1"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -229,18 +255,18 @@ export function HotelCheckIn() {
                           <p className="text-blue-200 mb-6">Scan this QR code with your mobile device to begin the secure check-in process</p>
                         </div>
                         <Button 
-                          onClick={() => setCurrentStep(2)}
-                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+                          onClick={() => setCurrentStep(3)}
+                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
                         >
-                          <Sparkles className="w-5 h-5 mr-2" />
-                          Generate New QR Code
+                          <Smartphone className="w-5 h-5 mr-2" />
+                          Continue to Scan
                         </Button>
                       </motion.div>
                     )}
 
-                    {currentStep === 2 && (
+                    {currentStep === 3 && (
                       <motion.div
-                        key="step2"
+                        key="step3"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
@@ -285,7 +311,7 @@ export function HotelCheckIn() {
                       </motion.div>
                     )}
 
-                    {currentStep >= 3 && currentStep <= 8 && (
+                    {currentStep >= 4 && currentStep <= 9 && (
                       <motion.div
                         key="step3-8"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -308,7 +334,7 @@ export function HotelCheckIn() {
                           <motion.div 
                             className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
                             initial={{ width: "0%" }}
-                            animate={{ width: `${((currentStep - 2) / 7) * 100}%` }}
+                            animate={{ width: `${((currentStep - 3) / 7) * 100}%` }}
                             transition={{ duration: 0.5 }}
                           />
                         </div>
@@ -327,7 +353,7 @@ export function HotelCheckIn() {
 
             {/* Credentials Display */}
             <AnimatePresence>
-              {currentStep >= 6 && currentStep <= 8 && (
+              {currentStep >= 7 && currentStep <= 9 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
