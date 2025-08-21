@@ -562,15 +562,13 @@ export function HotelCheckIn() {
                           </div>
                         )}
 
-                        {/* Polling Status - only show when we have required data */}
-                        {hasRequiredData && isPolling && (
-                          <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 mb-4">
-                            <div className="flex items-center gap-2 text-blue-300">
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              <span className="text-sm">Checking verification status...</span>
-                            </div>
+                        {/* Polling Status - always visible */}
+                        <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 mb-4">
+                          <div className="flex items-center gap-2 text-blue-300">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span className="text-sm">Checking verification status...</span>
                           </div>
-                        )}
+                        </div>
 
                         {/* Error Display - only show when we have required data */}
                         {hasRequiredData && pollingError && (
