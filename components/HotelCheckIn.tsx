@@ -76,12 +76,8 @@ export function HotelCheckIn() {
     { id: 1, title: 'Generate QR Code', status: currentStep >= 1 ? 'completed' : 'pending', actor: 'Hotel System' },
     { id: 2, title: 'QR Code Display', status: currentStep >= 2 ? 'completed' : 'pending', actor: 'Hotel System' },
     { id: 3, title: 'App Redirect', status: currentStep >= 3 ? 'completed' : 'pending', actor: 'NatWest App' },
-    { id: 4, title: 'User Login', status: currentStep >= 4 ? 'completed' : 'pending', actor: 'Guest' },
-    { id: 5, title: 'Biometric Verification', status: currentStep >= 5 ? 'completed' : 'pending', actor: 'Daon' },
-    { id: 6, title: 'VC Selection', status: currentStep >= 6 ? 'completed' : 'pending', actor: 'Guest' },
-    { id: 7, title: 'Data Sharing', status: currentStep >= 7 ? 'completed' : 'pending', actor: 'NatWest App' },
-    { id: 8, title: 'VC Verification', status: currentStep >= 8 ? 'completed' : 'pending', actor: 'Hotel System' },
-    { id: 9, title: 'Check-in Complete', status: currentStep >= 9 ? 'completed' : 'pending', actor: 'Hotel System' }
+    { id: 4, title: 'VC Verification', status: currentStep >= 4 ? 'completed' : 'pending', actor: 'Hotel System' },
+    { id: 5, title: 'Check-in Complete', status: currentStep >= 5 ? 'completed' : 'pending', actor: 'Hotel System' }
   ];
 
   useEffect(() => {
@@ -155,7 +151,7 @@ export function HotelCheckIn() {
     }
   }
 
-  // Progressive verification flow through steps 3-8
+  // Progressive verification flow through steps 3-5
   const startProgressiveVerification = () => {
     showToast('success', 'Verification successful! Processing credentials...', 4000);
     
@@ -165,33 +161,13 @@ export function HotelCheckIn() {
       
       setTimeout(() => {
         setCurrentStep(4);
-        showToast('success', 'User login verified', 2000);
+        showToast('success', 'VC verification in progress', 2000);
       }, 2000);
       
       setTimeout(() => {
         setCurrentStep(5);
-        showToast('success', 'Biometric verification completed', 2000);
-      }, 4000);
-      
-      setTimeout(() => {
-        setCurrentStep(6);
-        showToast('success', 'Credential selection in progress', 2000);
-      }, 6000);
-      
-      setTimeout(() => {
-        setCurrentStep(7);
-        showToast('success', 'Data sharing completed', 2000);
-      }, 8000);
-      
-      setTimeout(() => {
-        setCurrentStep(8);
-        showToast('success', 'Final verification in progress', 2000);
-      }, 10000);
-      
-      setTimeout(() => {
-        setCurrentStep(9);
         showToast('success', 'Check-in complete! Welcome to The Grand Hotel.', 6000);
-      }, 12000);
+      }, 4000);
     };
     
     progressSteps();
@@ -288,10 +264,10 @@ export function HotelCheckIn() {
   };
 
   const handleNextStep = () => {
-    if (currentStep < 9) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
       
-      if (currentStep === 6) {
+      if (currentStep === 4) {
         setVerificationData({
           name: 'John Smith',
           address: '123 Main Street, London, UK',
@@ -362,7 +338,7 @@ export function HotelCheckIn() {
     }
   };
 
-  if (currentStep === 9) {
+  if (currentStep === 5) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 flex items-center justify-center p-6">
         <motion.div
@@ -662,9 +638,9 @@ export function HotelCheckIn() {
                       </motion.div>
                     )}
 
-                    {currentStep >= 3 && currentStep <= 8 && (
+                    {currentStep >= 3 && currentStep <= 4 && (
                       <motion.div
-                        key="step3-8"
+                        key="step3-4"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
@@ -685,7 +661,7 @@ export function HotelCheckIn() {
                           <motion.div 
                             className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
                             initial={{ width: "0%" }}
-                            animate={{ width: `${((currentStep - 2) / 7) * 100}%` }}
+                            animate={{ width: `${((currentStep - 2) / 3) * 100}%` }}
                           />
                         </div>
                         <Button 
@@ -703,7 +679,7 @@ export function HotelCheckIn() {
 
             {/* Credentials Display */}
             <AnimatePresence>
-              {currentStep >= 6 && currentStep <= 8 && (
+              {currentStep === 4 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
