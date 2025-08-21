@@ -29,29 +29,19 @@ export function HotelCheckIn() {
   const steps: CheckInStep[] = [
     { id: 1, title: 'Generate QR Code', status: currentStep >= 1 ? 'completed' : 'pending', actor: 'Hotel System' },
     { id: 2, title: 'QR Code Display', status: currentStep >= 2 ? 'completed' : 'pending', actor: 'Hotel System' },
-    { id: 3, title: 'QR Code Scan', status: isScanned ? 'completed' : currentStep === 3 ? 'active' : 'pending', actor: 'Guest' },
-    { id: 4, title: 'App Redirect', status: currentStep >= 4 ? 'completed' : 'pending', actor: 'NatWest App' },
-    { id: 5, title: 'User Login', status: currentStep >= 5 ? 'completed' : 'pending', actor: 'Guest' },
-    { id: 6, title: 'Biometric Verification', status: currentStep >= 6 ? 'completed' : 'pending', actor: 'Daon' },
-    { id: 7, title: 'VC Selection', status: currentStep >= 7 ? 'completed' : 'pending', actor: 'Guest' },
-    { id: 8, title: 'Data Sharing', status: currentStep >= 8 ? 'completed' : 'pending', actor: 'NatWest App' },
-    { id: 9, title: 'VC Verification', status: currentStep >= 9 ? 'completed' : 'pending', actor: 'Hotel System' },
-    { id: 10, title: 'Check-in Complete', status: currentStep >= 10 ? 'completed' : 'pending', actor: 'Hotel System' }
+    { id: 3, title: 'App Redirect', status: currentStep >= 3 ? 'completed' : 'pending', actor: 'NatWest App' },
+    { id: 4, title: 'User Login', status: currentStep >= 4 ? 'completed' : 'pending', actor: 'Guest' },
+    { id: 5, title: 'Biometric Verification', status: currentStep >= 5 ? 'completed' : 'pending', actor: 'Daon' },
+    { id: 6, title: 'VC Selection', status: currentStep >= 6 ? 'completed' : 'pending', actor: 'Guest' },
+    { id: 7, title: 'Data Sharing', status: currentStep >= 7 ? 'completed' : 'pending', actor: 'NatWest App' },
+    { id: 8, title: 'VC Verification', status: currentStep >= 8 ? 'completed' : 'pending', actor: 'Hotel System' },
+    { id: 9, title: 'Check-in Complete', status: currentStep >= 9 ? 'completed' : 'pending', actor: 'Hotel System' }
   ];
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
-
-  useEffect(() => {
-    if (isScanned && currentStep === 3) {
-      const timer = setTimeout(() => {
-        setCurrentStep(4);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [isScanned, currentStep]);
 
   const handleGenerateQR = async () => {
     setIsGeneratingQR(true);
@@ -105,15 +95,11 @@ export function HotelCheckIn() {
     }
   };
 
-  const handleScanQR = () => {
-    setIsScanned(true);
-  };
-
   const handleNextStep = () => {
-    if (currentStep < 10) {
+    if (currentStep < 9) {
       setCurrentStep(currentStep + 1);
       
-      if (currentStep === 7) {
+      if (currentStep === 6) {
         setVerificationData({
           name: 'John Smith',
           address: '123 Main Street, London, UK',
@@ -130,7 +116,7 @@ export function HotelCheckIn() {
     return <div className="w-5 h-5 rounded-full border-2 border-gray-300 bg-gray-100" />;
   };
 
-  if (currentStep === 10) {
+  if (currentStep === 9) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 flex items-center justify-center p-6">
         <motion.div
@@ -353,45 +339,8 @@ export function HotelCheckIn() {
                             </div>
                           )}
                         </div>
-                        <div className="text-white">
-                          <h3 className="text-xl font-semibold mb-2">Ready for Check-in</h3>
-                          <p className="text-blue-200 mb-6">
-                            {qrCodeData?.qrCodeUrl 
-                              ? 'Scan this QR code with your mobile device to begin the secure check-in process'
-                              : 'QR code is being generated...'
-                            }
-                          </p>
-                        </div>
-                        <Button 
-                          onClick={() => setCurrentStep(3)}
-                          disabled={!qrCodeData?.qrCodeUrl}
-                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Smartphone className="w-5 h-5 mr-2" />
-                          Continue to Scan
-                        </Button>
-                      </motion.div>
-                    )}
-
-                    {currentStep === 3 && (
-                      <motion.div
-                        key="step3"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        className="text-center space-y-6"
-                      >
-                        <motion.div
-                          animate={{ scale: [1, 1.1, 1] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto shadow-lg"
-                        >
-                          <Smartphone className="w-10 h-10 text-white" />
-                        </motion.div>
-                        <div className="text-white">
-                          <h3 className="text-xl font-semibold mb-2">Waiting for QR Scan</h3>
-                          <p className="text-blue-200 mb-6">Please point your mobile camera at the QR code above</p>
-                        </div>
+                        
+                        {/* Animated dots below QR code */}
                         <div className="flex items-center justify-center gap-2 text-yellow-300">
                           <motion.div 
                             className="w-2 h-2 bg-yellow-300 rounded-full"
@@ -409,18 +358,28 @@ export function HotelCheckIn() {
                             transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
                           />
                         </div>
+                        
+                        <div className="text-white">
+                          <h3 className="text-xl font-semibold mb-2">Ready for Check-in</h3>
+                          <p className="text-blue-200 mb-6">
+                            {qrCodeData?.qrCodeUrl 
+                              ? 'Scan this QR code with your mobile device to begin the secure check-in process'
+                              : 'QR code is being generated...'
+                            }
+                          </p>
+                        </div>
                         <Button 
-                          onClick={handleScanQR} 
-                          disabled={isScanned}
-                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50"
+                          onClick={() => setCurrentStep(3)}
+                          disabled={!qrCodeData?.qrCodeUrl}
+                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          <Scan className="w-5 h-5 mr-2" />
-                          {isScanned ? 'QR Code Scanned!' : 'Simulate QR Scan'}
+                          <Smartphone className="w-5 h-5 mr-2" />
+                          Continue to Next Step
                         </Button>
                       </motion.div>
                     )}
 
-                    {currentStep >= 4 && currentStep <= 9 && (
+                    {currentStep >= 3 && currentStep <= 8 && (
                       <motion.div
                         key="step3-8"
                         initial={{ opacity: 0, scale: 0.9 }}
@@ -443,7 +402,7 @@ export function HotelCheckIn() {
                           <motion.div 
                             className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
                             initial={{ width: "0%" }}
-                            animate={{ width: `${((currentStep - 3) / 7) * 100}%` }}
+                            animate={{ width: `${((currentStep - 2) / 7) * 100}%` }}
                           />
                         </div>
                         <Button 
@@ -461,7 +420,7 @@ export function HotelCheckIn() {
 
             {/* Credentials Display */}
             <AnimatePresence>
-              {currentStep >= 7 && currentStep <= 9 && (
+              {currentStep >= 6 && currentStep <= 8 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -492,7 +451,7 @@ export function HotelCheckIn() {
                           </Badge>
                         </motion.div>
                         <motion.div 
-                          className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl border border-blue-500/30"
+                          className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl border border-blue-500/30"
                           whileHover={{ scale: 1.02 }}
                         >
                           <div className="flex items-center gap-3">
