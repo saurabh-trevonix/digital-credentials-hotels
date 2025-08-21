@@ -4,7 +4,9 @@ import type {
   ApiError, 
   PresentationRequest, 
   PresentationResponse, 
-  QRCodeResponse 
+  QRCodeResponse,
+  VerificationStatusResponse,
+  VerificationStatus
 } from '@/types/api';
 import { API_CONFIG, API_TIMEOUTS } from '@/lib/config';
 
@@ -131,11 +133,31 @@ export async function createPresentationRequest(
     if (!data._links?.qr?.href) {
       throw new Error('Invalid presentation response: missing QR code URL');
     }
+    
+    if (!data.id) {
+      throw new Error('Invalid presentation response: missing session ID');
+    }
+    
+    if (!data.environment?.id) {
+      throw new Error('Invalid presentation response: missing environment ID');
+    }
+    
+    if (!data.expiresAt) {
+      throw new Error('Invalid presentation response: missing expiry time');
+    }
+
+    console.log('Validated presentation response:', {
+      id: data.id,
+      environmentId: data.environment.id,
+      expiresAt: data.expiresAt,
+      status: data.status
+    });
 
     return {
       qrCodeUrl: data._links.qr.href,
       sessionId: data.id,
-      status: data.status
+      status: data.status,
+      rawResponse: data // Store the full response for polling
     };
   } catch (error) {
     if (error instanceof Error) {
@@ -164,5 +186,51 @@ export async function generateQRCode(accessToken: string): Promise<QRCodeRespons
   } catch (error) {
     console.error('Error generating QR code:', error);
     throw error;
+  }
+}
+
+// Check verification status for polling
+export async function checkVerificationStatus(
+  accessToken: string, 
+  environmentId: string, 
+  sessionId: string
+): Promise<VerificationStatusResponse> {
+  const statusUrl = `${API_CONFIG.pingOne.apiPath}/environments/${environmentId}/presentationSessions/${sessionId}`;
+  
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUTS.pingOne);
+
+    const response = await fetch(statusUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Status check failed: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const data: VerificationStatusResponse = await response.json();
+    
+    // Validate response structure
+    if (!data.id || !data.status) {
+      throw new Error('Invalid status response: missing required fields');
+    }
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'AbortError') {
+        throw new Error('Status check request timed out');
+      }
+      throw new Error(`Failed to check verification status: ${error.message}`);
+    }
+    throw new Error('Failed to check verification status: Unknown error');
   }
 }

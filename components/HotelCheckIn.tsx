@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { CheckCircle, Clock, Smartphone, Shield, User, MapPin, Sparkles, Wifi, Scan, Building2, Loader2 } from 'lucide-react';
+import { CheckCircle, Clock, Smartphone, Shield, User, MapPin, Sparkles, Wifi, Scan, Building2, Loader2, AlertCircle, RefreshCw, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPingOneAccessToken, generateQRCode } from '@/lib/api';
 import { showToast } from './ui/toast';
-import type { QRCodeResponse } from '@/types/api';
+import { useVerificationPolling } from '@/hooks/useVerificationPolling';
+import type { QRCodeResponse, NormalizedStatus, VerificationStatusResponse } from '@/types/api';
 
 interface CheckInStep {
   id: number;
@@ -26,6 +27,47 @@ export function HotelCheckIn() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [qrCodeData, setQrCodeData] = useState<QRCodeResponse | null>(null);
 
+  // Polling hook for verification status - always call the hook but with current data
+  const hasRequiredData = accessToken && qrCodeData?.rawResponse?.environment?.id && qrCodeData?.sessionId && qrCodeData?.rawResponse?.expiresAt;
+  
+  const {
+    status: verificationStatus,
+    isLoading: isPolling,
+    error: pollingError,
+    startPolling,
+    stopPolling,
+    reset: resetPolling
+  } = useVerificationPolling({
+    accessToken: accessToken || '',
+    environmentId: qrCodeData?.rawResponse?.environment?.id || '',
+    sessionId: qrCodeData?.sessionId || '',
+    expiresAt: qrCodeData?.rawResponse?.expiresAt || '',
+    onStatusChange: handleVerificationStatusChange,
+    onError: handlePollingError
+  });
+
+  // Debug logging for polling data
+  useEffect(() => {
+    if (qrCodeData) {
+      console.log('Polling hook data:', {
+        accessToken: !!accessToken,
+        environmentId: qrCodeData.rawResponse?.environment?.id,
+        sessionId: qrCodeData.sessionId,
+        expiresAt: qrCodeData.rawResponse?.expiresAt,
+        hasRequiredData,
+        verificationStatus
+      });
+    }
+  }, [qrCodeData, accessToken, hasRequiredData, verificationStatus]);
+
+  // Auto-start polling when required data becomes available
+  useEffect(() => {
+    if (hasRequiredData && verificationStatus === 'pending' && !isPolling) {
+      console.log('Auto-starting polling with available data...');
+      startPolling();
+    }
+  }, [hasRequiredData, verificationStatus, isPolling, startPolling]);
+
   const steps: CheckInStep[] = [
     { id: 1, title: 'Generate QR Code', status: currentStep >= 1 ? 'completed' : 'pending', actor: 'Hotel System' },
     { id: 2, title: 'QR Code Display', status: currentStep >= 2 ? 'completed' : 'pending', actor: 'Hotel System' },
@@ -42,6 +84,41 @@ export function HotelCheckIn() {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Handle verification status changes
+  function handleVerificationStatusChange(status: NormalizedStatus, data: VerificationStatusResponse) {
+    console.log('Verification status changed:', status, data);
+    
+    switch (status) {
+      case 'scanned':
+        setIsScanned(true);
+        setCurrentStep(3);
+        showToast('success', 'QR Code scanned! Please approve in your app.', 4000);
+        break;
+      case 'approved':
+        setCurrentStep(9);
+        showToast('success', 'Verification successful! Check-in complete.', 6000);
+        break;
+      case 'declined':
+        showToast('error', 'Verification declined by user. Please try again.', 6000);
+        break;
+      case 'expired':
+        showToast('error', 'QR Code expired. Please generate a new one.', 6000);
+        break;
+      case 'failed':
+        showToast('error', 'Verification failed. Please try again.', 6000);
+        break;
+      case 'timeout':
+        showToast('error', 'Verification timeout. Please try again.', 6000);
+        break;
+    }
+  }
+
+  // Handle polling errors
+  function handlePollingError(error: Error) {
+    console.error('Polling error:', error);
+    showToast('error', `Polling error: ${error.message}`, 4000);
+  }
 
   const handleGenerateQR = async () => {
     setIsGeneratingQR(true);
@@ -68,13 +145,38 @@ export function HotelCheckIn() {
       console.log('Successfully generated QR code:', {
         sessionId: qrResponse.sessionId,
         status: qrResponse.status,
-        qrCodeUrl: qrResponse.qrCodeUrl
+        qrCodeUrl: qrResponse.qrCodeUrl,
+        rawResponse: qrResponse.rawResponse
       });
       
       showToast('success', 'QR Code generated successfully!', 4000);
       
       // Move to next step
       setCurrentStep(2);
+      
+      // Start polling immediately after QR is shown
+      // Only start if we have all required data
+      if (qrResponse.rawResponse?.environment?.id && qrResponse.sessionId && qrResponse.rawResponse.expiresAt) {
+        console.log('Starting polling with:', {
+          environmentId: qrResponse.rawResponse.environment.id,
+          sessionId: qrResponse.sessionId,
+          expiresAt: qrResponse.rawResponse.expiresAt
+        });
+        
+        // Start polling if the hook is ready
+        if (hasRequiredData) {
+          console.log('Starting polling immediately...');
+          startPolling();
+        } else {
+          console.log('Polling hook not ready yet, will start on next render');
+        }
+      } else {
+        console.error('Missing required data for polling:', {
+          environmentId: qrResponse.rawResponse?.environment?.id,
+          sessionId: qrResponse.sessionId,
+          expiresAt: qrResponse.rawResponse?.expiresAt
+        });
+      }
       
     } catch (error) {
       console.error('Error generating QR code:', error);
@@ -93,6 +195,13 @@ export function HotelCheckIn() {
     } finally {
       setIsGeneratingQR(false);
     }
+  };
+
+  const handleRefreshQR = () => {
+    resetPolling();
+    setQrCodeData(null);
+    setCurrentStep(1);
+    handleGenerateQR();
   };
 
   const handleNextStep = () => {
@@ -114,6 +223,60 @@ export function HotelCheckIn() {
     if (step.status === 'completed') return <CheckCircle className="w-5 h-5 text-emerald-500" />;
     if (step.status === 'active') return <Clock className="w-5 h-5 text-blue-500 animate-pulse" />;
     return <div className="w-5 h-5 rounded-full border-2 border-gray-300 bg-gray-100" />;
+  };
+
+  // Get status display text and icon
+  const getStatusDisplay = () => {
+    switch (verificationStatus) {
+      case 'pending':
+        return {
+          text: 'Waiting for scan...',
+          icon: <Clock className="w-6 h-6 text-blue-500 animate-pulse" />,
+          color: 'text-blue-500'
+        };
+      case 'scanned':
+        return {
+          text: 'QR scanned. Approve in your app...',
+          icon: <Smartphone className="w-6 h-6 text-yellow-500" />,
+          color: 'text-yellow-500'
+        };
+      case 'approved':
+        return {
+          text: 'Verified!',
+          icon: <CheckCircle className="w-6 h-6 text-green-500" />,
+          color: 'text-green-500'
+        };
+      case 'declined':
+        return {
+          text: 'User rejected. Try again?',
+          icon: <XCircle className="w-6 h-6 text-red-500" />,
+          color: 'text-red-500'
+        };
+      case 'expired':
+        return {
+          text: 'QR expired. Refresh to continue.',
+          icon: <AlertCircle className="w-6 h-6 text-orange-500" />,
+          color: 'text-orange-500'
+        };
+      case 'failed':
+        return {
+          text: 'Verification failed. Please retry.',
+          icon: <XCircle className="w-6 h-6 text-red-500" />,
+          color: 'text-red-500'
+        };
+      case 'timeout':
+        return {
+          text: 'Verification timeout. Please retry.',
+          icon: <AlertCircle className="w-6 h-6 text-orange-500" />,
+          color: 'text-orange-500'
+        };
+      default:
+        return {
+          text: 'Ready for scan',
+          icon: <Scan className="w-6 h-6 text-blue-500" />,
+          color: 'text-blue-500'
+        };
+    }
   };
 
   if (currentStep === 9) {
@@ -177,6 +340,7 @@ export function HotelCheckIn() {
                   setVerificationData(null);
                   setAccessToken(null);
                   setQrCodeData(null);
+                  resetPolling();
                 }}
                 className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
               >
@@ -306,6 +470,36 @@ export function HotelCheckIn() {
                         exit={{ opacity: 0, scale: 0.9 }}
                         className="text-center space-y-6"
                       >
+                        {/* Status Display - only show when we have required data */}
+                        {hasRequiredData && (
+                          <div className="flex items-center justify-center gap-3 mb-4">
+                            {getStatusDisplay().icon}
+                            <span className={`text-lg font-semibold ${getStatusDisplay().color}`}>
+                              {getStatusDisplay().text}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Polling Status - only show when we have required data */}
+                        {hasRequiredData && isPolling && (
+                          <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 mb-4">
+                            <div className="flex items-center gap-2 text-blue-300">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span className="text-sm">Checking verification status...</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Error Display - only show when we have required data */}
+                        {hasRequiredData && pollingError && (
+                          <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-4">
+                            <div className="flex items-center gap-2 text-red-300">
+                              <AlertCircle className="w-4 h-4" />
+                              <span className="text-sm">Error: {pollingError.message}</span>
+                            </div>
+                          </div>
+                        )}
+
                         <div className="w-64 h-64 bg-white/95 rounded-3xl shadow-2xl mx-auto flex items-center justify-center border-4 border-gray-200">
                           {qrCodeData?.qrCodeUrl ? (
                             <div className="text-center">
@@ -340,42 +534,51 @@ export function HotelCheckIn() {
                           )}
                         </div>
                         
-                        {/* Animated dots below QR code */}
-                        <div className="flex items-center justify-center gap-2 text-yellow-300">
-                          <motion.div 
-                            className="w-2 h-2 bg-yellow-300 rounded-full"
-                            animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                            transition={{ duration: 1, repeat: Infinity, delay: 0 }}
-                          />
-                          <motion.div 
-                            className="w-2 h-2 bg-yellow-300 rounded-full"
-                            animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                            transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-                          />
-                          <motion.div 
-                            className="w-2 h-2 bg-yellow-300 rounded-full"
-                            animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                            transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-                          />
-                        </div>
+                        {/* Action Buttons - only show when we have required data */}
+                        {hasRequiredData && (
+                          <div className="flex gap-3 justify-center">
+                            {verificationStatus === 'expired' && (
+                              <Button 
+                                onClick={handleRefreshQR}
+                                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-6 py-2 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+                              >
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                Refresh QR
+                              </Button>
+                            )}
+                            
+                            {verificationStatus === 'declined' && (
+                              <Button 
+                                onClick={handleRefreshQR}
+                                className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+                              >
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                Try Again
+                              </Button>
+                            )}
+                            
+                            {verificationStatus === 'approved' && (
+                              <Button 
+                                onClick={() => setCurrentStep(3)}
+                                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+                              >
+                                <Smartphone className="w-5 h-4 mr-2" />
+                                Continue to Next Step
+                              </Button>
+                            )}
+                          </div>
+                        )}
                         
-                        <div className="text-white">
-                          <h3 className="text-xl font-semibold mb-2">Ready for Check-in</h3>
-                          <p className="text-blue-200 mb-6">
-                            {qrCodeData?.qrCodeUrl 
-                              ? 'Scan this QR code with your mobile device to begin the secure check-in process'
-                              : 'QR code is being generated...'
-                            }
-                          </p>
-                        </div>
-                        <Button 
-                          onClick={() => setCurrentStep(3)}
-                          disabled={!qrCodeData?.qrCodeUrl}
-                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Smartphone className="w-5 h-5 mr-2" />
-                          Continue to Next Step
-                        </Button>
+                        {/* Session Info */}
+                        {qrCodeData?.rawResponse && (
+                          <div className="bg-gray-500/20 border border-gray-500/30 rounded-lg p-3 mt-4">
+                            <div className="text-gray-300 text-xs space-y-1">
+                              <p>Session ID: {qrCodeData.sessionId}</p>
+                              <p>Expires: {new Date(qrCodeData.rawResponse.expiresAt).toLocaleTimeString()}</p>
+                              <p>Environment: {qrCodeData.rawResponse.environment.id}</p>
+                            </div>
+                          </div>
+                        )}
                       </motion.div>
                     )}
 
