@@ -16,7 +16,7 @@ interface UseVerificationPollingOptions {
   environmentId: string;
   sessionId: string;
   expiresAt: string;
-  onStatusChange?: (status: NormalizedStatus, data: VerificationStatusResponse) => void;
+  onStatusChange?: (status: NormalizedStatus, data: VerificationStatusResponse, userInfo?: any) => void;
   onError?: (error: Error) => void;
 }
 
@@ -93,13 +93,14 @@ export function useVerificationPolling({
 
     try {
       const response = await checkVerificationStatus(accessToken, environmentId, sessionId);
-      const normalizedStatus = STATUS_MAP[response.status];
+      const normalizedStatus = STATUS_MAP[response.verificationStatus.status];
+      const userInfo = response.userInfo;
       
       // Reset error count on success
       consecutiveErrorsRef.current = 0;
       
       setStatus(normalizedStatus);
-      onStatusChange?.(normalizedStatus, response);
+      onStatusChange?.(normalizedStatus, response.verificationStatus, userInfo);
 
       // Stop polling on terminal states
       if (['approved', 'declined', 'expired', 'failed'].includes(normalizedStatus)) {

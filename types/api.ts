@@ -102,6 +102,64 @@ export interface VerificationStatusResponse {
   [key: string]: any;
 }
 
+// Credential data types for successful verification
+export interface CredentialDataResponse {
+  _links?: {
+    self: { href: string };
+    qr: { href: string };
+    appOpenUrl: { href: string };
+  };
+  id: string;
+  environment: {
+    id: string;
+  };
+  status: string;
+  createdAt: string;
+  expiresAt: string;
+  sessionData: {
+    id: string;
+    credentialsDataList: Array<{
+      issuerId: string;
+      issuerName: string;
+      issuerApplicationInstanceId: string;
+      issuanceDate: string;
+      type: string;
+      types: string[];
+      data: Array<{
+        key: string;
+        value: string;
+      }>;
+      verificationStatus: string;
+    }>;
+  };
+  applicationInstance: {
+    id: string;
+  };
+  [key: string]: any;
+}
+
+export interface FlattenedCredentialData {
+  [credentialName: string]: {
+    id: string;
+    type: string;
+    verificationStatus: string;
+    issuerName: string;
+    issuerId: string;
+    data: Record<string, string>;
+    // Extracted user information
+    userInfo?: {
+      firstName?: string;
+      lastName?: string;
+      fullName?: string;
+      address?: string;
+      city?: string;
+      postalCode?: string;
+      birthdate?: string;
+      age?: number;
+    };
+  };
+}
+
 // Normalized status for frontend
 export type NormalizedStatus = 
   | 'pending'           // Waiting for scan

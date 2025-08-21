@@ -90,8 +90,23 @@ export function HotelCheckIn() {
   }, []);
 
   // Handle verification status changes
-  function handleVerificationStatusChange(status: NormalizedStatus, data: VerificationStatusResponse) {
+  function handleVerificationStatusChange(
+    status: NormalizedStatus, 
+    data: VerificationStatusResponse, 
+    userInfo?: {
+      firstName?: string;
+      lastName?: string;
+      fullName?: string;
+      street?: string;
+      address?: string;
+      city?: string;
+      postalCode?: string;
+      birthdate?: string;
+      age?: number;
+    }
+  ) {
     console.log('Verification status changed:', status, data);
+    console.log('User info received:', userInfo);
     
     switch (status) {
       case 'scanned':
@@ -99,6 +114,26 @@ export function HotelCheckIn() {
         showToast('success', 'QR Code scanned! Please approve in your app.', 4000);
         break;
       case 'approved':
+        // Set verification data with actual user information if available
+        if (userInfo) {
+          setVerificationData({
+            name: userInfo.fullName || `${userInfo.firstName || ''} ${userInfo.lastName || ''}`.trim() || 'User',
+            address: userInfo.address || `${userInfo.street || ''} ${userInfo.city || ''} ${userInfo.postalCode || ''}`.trim() || 'Address not available',
+            age: userInfo.age ? `${userInfo.age}` : 'Age not available',
+            verified: true
+          });
+          console.log('✅ Verification data populated with user info:', userInfo);
+        } else {
+          // Fallback to default data if no user info available
+          setVerificationData({
+            name: 'User',
+            address: 'Address not available',
+            age: 'Age not available',
+            verified: true
+          });
+          console.log('⚠️ No user info available, using fallback data');
+        }
+        
         // Start progressive step-by-step flow through verification steps
         startProgressiveVerification();
         break;
