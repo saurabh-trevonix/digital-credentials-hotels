@@ -17,12 +17,14 @@ async function testPingOneIntegration() {
     console.log(`   Scope: ${tokenResponse.scope}`);
     console.log(`   Access Token: ${tokenResponse.access_token.substring(0, 20)}...\n`);
 
-    // Test 2: Generate QR code
-    console.log('2️⃣ Testing QR code generation...');
-    const qrData = await generateQRCode(tokenResponse.access_token);
+    // Test 2: Generate QR code via presentation request
+    console.log('2️⃣ Testing QR code generation via presentation request...');
+    const qrResponse = await generateQRCode(tokenResponse.access_token);
     
     console.log('✅ Successfully generated QR code:');
-    console.log(`   QR Data: ${qrData}\n`);
+    console.log(`   Session ID: ${qrResponse.sessionId}`);
+    console.log(`   Status: ${qrResponse.status}`);
+    console.log(`   QR Code URL: ${qrResponse.qrCodeUrl}\n`);
 
     console.log('🎉 All tests passed! PingOne integration is working correctly.');
 

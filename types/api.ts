@@ -27,3 +27,34 @@ export interface CheckInSession {
   createdAt: string;
   status: 'pending' | 'active' | 'completed' | 'failed';
 }
+
+// PingOne Presentation Request types
+export interface PresentationRequest {
+  message: string;
+  protocol: 'NATIVE';
+  digitalWalletApplication: {
+    id: string;
+  };
+  requestedCredentials: Array<{
+    type: string;
+    keys: string[];
+  }>;
+}
+
+export interface PresentationResponse {
+  id: string;
+  status: string;
+  _links: {
+    qr: {
+      href: string;
+    };
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
+
+export interface QRCodeResponse {
+  qrCodeUrl: string;
+  sessionId: string;
+  status: string;
+}

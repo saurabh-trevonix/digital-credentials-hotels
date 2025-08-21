@@ -8,6 +8,7 @@ import { CheckCircle, Clock, Smartphone, Shield, User, MapPin, Sparkles, Wifi, S
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPingOneAccessToken, generateQRCode } from '@/lib/api';
 import { showToast } from './ui/toast';
+import type { QRCodeResponse } from '@/types/api';
 
 interface CheckInStep {
   id: number;
@@ -23,6 +24,7 @@ export function HotelCheckIn() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [qrCodeData, setQrCodeData] = useState<QRCodeResponse | null>(null);
 
   const steps: CheckInStep[] = [
     { id: 1, title: 'Generate QR Code', status: currentStep >= 1 ? 'completed' : 'pending', actor: 'Hotel System' },
@@ -68,11 +70,17 @@ export function HotelCheckIn() {
       
       showToast('success', 'Successfully authenticated with PingOne!', 4000);
       
-      // Step 2: Generate QR code (placeholder for now)
-      console.log('Generating QR code with access token...');
-      const qrData = await generateQRCode(tokenResponse.access_token);
+      // Step 2: Generate QR code via presentation request
+      console.log('Creating presentation request to generate QR code...');
+      const qrResponse = await generateQRCode(tokenResponse.access_token);
+      setQrCodeData(qrResponse);
       
-      console.log('QR code generated successfully:', qrData);
+      console.log('Successfully generated QR code:', {
+        sessionId: qrResponse.sessionId,
+        status: qrResponse.status,
+        qrCodeUrl: qrResponse.qrCodeUrl
+      });
+      
       showToast('success', 'QR Code generated successfully!', 4000);
       
       // Move to next step
@@ -182,6 +190,7 @@ export function HotelCheckIn() {
                   setIsScanned(false);
                   setVerificationData(null);
                   setAccessToken(null);
+                  setQrCodeData(null);
                 }}
                 className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
               >
@@ -296,7 +305,8 @@ export function HotelCheckIn() {
                         {isGeneratingQR && (
                           <div className="text-blue-200 text-sm">
                             <p>🔐 Authenticating with PingOne...</p>
-                            <p>📱 Generating secure QR code...</p>
+                            <p>📱 Creating presentation request...</p>
+                            <p>🔄 Generating secure QR code...</p>
                           </div>
                         )}
                       </motion.div>
@@ -311,29 +321,51 @@ export function HotelCheckIn() {
                         className="text-center space-y-6"
                       >
                         <div className="w-64 h-64 bg-white/95 rounded-3xl shadow-2xl mx-auto flex items-center justify-center border-4 border-gray-200">
-                          <div className="text-center">
-                            <div className="w-40 h-40 bg-gradient-to-br from-gray-800 to-black mx-auto mb-4 rounded-2xl flex items-center justify-center shadow-lg">
-                              <div className="grid grid-cols-8 gap-1">
-                                {Array.from({ length: 64 }).map((_, i) => (
-                                  <motion.div 
-                                    key={i} 
-                                    className={`w-1 h-1 rounded-sm ${Math.random() > 0.5 ? 'bg-white' : 'bg-black'}`}
-                                    animate={{ opacity: [0.3, 1, 0.3] }}
-                                    transition={{ duration: 2, repeat: Infinity, delay: Math.random() * 2 }}
-                                  />
-                                ))}
-                              </div>
+                          {qrCodeData?.qrCodeUrl ? (
+                            <div className="text-center">
+                              <img 
+                                src={qrCodeData.qrCodeUrl} 
+                                alt="Secure QR Code" 
+                                className="w-40 h-40 mx-auto mb-4 rounded-2xl shadow-lg"
+                                onError={(e) => {
+                                  console.error('Failed to load QR code image:', e);
+                                  showToast('error', 'Failed to load QR code image', 4000);
+                                }}
+                              />
+                              <p className="text-gray-600 font-medium">Secure QR Code</p>
+                              <p className="text-gray-500 text-sm">Session: {qrCodeData.sessionId}</p>
                             </div>
-                            <p className="text-gray-600 font-medium">Secure QR Code</p>
-                          </div>
+                          ) : (
+                            <div className="text-center">
+                              <div className="w-40 h-40 bg-gradient-to-br from-gray-800 to-black mx-auto mb-4 rounded-2xl flex items-center justify-center shadow-lg">
+                                <div className="grid grid-cols-8 gap-1">
+                                  {Array.from({ length: 64 }).map((_, i) => (
+                                    <motion.div 
+                                      key={i} 
+                                      className={`w-1 h-1 rounded-sm ${Math.random() > 0.5 ? 'bg-white' : 'bg-black'}`}
+                                      animate={{ opacity: [0.3, 1, 0.3] }}
+                                      transition={{ duration: 2, repeat: Infinity, delay: Math.random() * 2 }}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                              <p className="text-gray-600 font-medium">QR Code Loading...</p>
+                            </div>
+                          )}
                         </div>
                         <div className="text-white">
                           <h3 className="text-xl font-semibold mb-2">Ready for Check-in</h3>
-                          <p className="text-blue-200 mb-6">Scan this QR code with your mobile device to begin the secure check-in process</p>
+                          <p className="text-blue-200 mb-6">
+                            {qrCodeData?.qrCodeUrl 
+                              ? 'Scan this QR code with your mobile device to begin the secure check-in process'
+                              : 'QR code is being generated...'
+                            }
+                          </p>
                         </div>
                         <Button 
                           onClick={() => setCurrentStep(3)}
-                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105"
+                          disabled={!qrCodeData?.qrCodeUrl}
+                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Smartphone className="w-5 h-5 mr-2" />
                           Continue to Scan
@@ -412,7 +444,6 @@ export function HotelCheckIn() {
                             className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"
                             initial={{ width: "0%" }}
                             animate={{ width: `${((currentStep - 3) / 7) * 100}%` }}
-                            transition={{ duration: 0.5 }}
                           />
                         </div>
                         <Button 
