@@ -20,8 +20,13 @@ interface CheckInStep {
 
 export function HotelCheckIn() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [isScanned, setIsScanned] = useState(false);
-  const [verificationData, setVerificationData] = useState<any>(null);
+
+  const [verificationData, setVerificationData] = useState<{
+    name?: string;
+    address?: string;
+    age?: string;
+    verified?: boolean;
+  } | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isGeneratingQR, setIsGeneratingQR] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -35,7 +40,6 @@ export function HotelCheckIn() {
     isLoading: isPolling,
     error: pollingError,
     startPolling,
-    stopPolling,
     reset: resetPolling
   } = useVerificationPolling({
     accessToken: accessToken || '',
@@ -91,13 +95,12 @@ export function HotelCheckIn() {
     
     switch (status) {
       case 'scanned':
-        setIsScanned(true);
         setCurrentStep(3);
         showToast('success', 'QR Code scanned! Please approve in your app.', 4000);
         break;
       case 'approved':
-        setCurrentStep(9);
-        showToast('success', 'Verification successful! Check-in complete.', 6000);
+        // Start progressive step-by-step flow through verification steps
+        startProgressiveVerification();
         break;
       case 'declined':
         showToast('error', 'Verification declined by user. Please try again.', 6000);
@@ -111,8 +114,53 @@ export function HotelCheckIn() {
       case 'timeout':
         showToast('error', 'Verification timeout. Please try again.', 6000);
         break;
+      default:
+        console.log('Unhandled status:', status, 'Raw status:', data.status);
+        break;
     }
   }
+
+  // Progressive verification flow through steps 3-8
+  const startProgressiveVerification = () => {
+    showToast('success', 'Verification successful! Processing credentials...', 4000);
+    
+    // Progress through each step with 2-second delays
+    const progressSteps = () => {
+      setCurrentStep(3);
+      
+      setTimeout(() => {
+        setCurrentStep(4);
+        showToast('success', 'User login verified', 2000);
+      }, 2000);
+      
+      setTimeout(() => {
+        setCurrentStep(5);
+        showToast('success', 'Biometric verification completed', 2000);
+      }, 4000);
+      
+      setTimeout(() => {
+        setCurrentStep(6);
+        showToast('success', 'Credential selection in progress', 2000);
+      }, 6000);
+      
+      setTimeout(() => {
+        setCurrentStep(7);
+        showToast('success', 'Data sharing completed', 2000);
+      }, 8000);
+      
+      setTimeout(() => {
+        setCurrentStep(8);
+        showToast('success', 'Final verification in progress', 2000);
+      }, 10000);
+      
+      setTimeout(() => {
+        setCurrentStep(9);
+        showToast('success', 'Check-in complete! Welcome to The Grand Hotel.', 6000);
+      }, 12000);
+    };
+    
+    progressSteps();
+  };
 
   // Handle polling errors
   function handlePollingError(error: Error) {
@@ -336,7 +384,6 @@ export function HotelCheckIn() {
               <Button 
                 onClick={() => {
                   setCurrentStep(1);
-                  setIsScanned(false);
                   setVerificationData(null);
                   setAccessToken(null);
                   setQrCodeData(null);
@@ -691,7 +738,7 @@ export function HotelCheckIn() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {steps.map((step, index) => (
+                  {steps.map((step) => (
                     <motion.div 
                       key={step.id} 
                       className="flex items-center gap-4 p-3 rounded-lg transition-all duration-300"

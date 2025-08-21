@@ -5,12 +5,10 @@ import type { VerificationStatus, NormalizedStatus, VerificationStatusResponse }
 // Map PingOne statuses to normalized frontend statuses
 const STATUS_MAP: Record<VerificationStatus, NormalizedStatus> = {
   'INITIAL': 'pending',
-  'SCANNED': 'scanned',
-  'APPROVED': 'approved',
-  'DECLINED': 'declined',
-  'EXPIRED': 'expired',
-  'FAILED': 'failed',
-  'TIMEOUT': 'timeout'
+  'WAITING': 'scanned',
+  'VERIFICATION_SUCCESSFUL': 'approved',
+  'VERIFICATION_FAILED': 'failed',
+  'VERIFICATION_EXPIRED': 'expired'
 };
 
 interface UseVerificationPollingOptions {

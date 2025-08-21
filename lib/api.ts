@@ -1,12 +1,10 @@
 // API utilities for PingOne integration
 import type { 
   PingOneTokenResponse, 
-  ApiError, 
   PresentationRequest, 
   PresentationResponse, 
   QRCodeResponse,
-  VerificationStatusResponse,
-  VerificationStatus
+  VerificationStatusResponse
 } from '@/types/api';
 import { API_CONFIG, API_TIMEOUTS } from '@/lib/config';
 

@@ -74,9 +74,9 @@ export function ToastContainer() {
 
   // Expose addToast globally for use in other components
   useEffect(() => {
-    (window as any).showToast = addToast;
+    (window as { showToast?: typeof addToast }).showToast = addToast;
     return () => {
-      delete (window as any).showToast;
+      delete (window as { showToast?: typeof addToast }).showToast;
     };
   }, []);
 
@@ -97,7 +97,8 @@ export function ToastContainer() {
 
 // Utility function to show toasts from anywhere
 export function showToast(type: 'success' | 'error', message: string, duration?: number) {
-  if (typeof window !== 'undefined' && (window as any).showToast) {
-    (window as any).showToast({ type, message, duration });
+  const windowWithToast = window as { showToast?: (toast: Omit<Toast, 'id'>) => void };
+  if (typeof window !== 'undefined' && windowWithToast.showToast) {
+    windowWithToast.showToast({ type, message, duration });
   }
 }

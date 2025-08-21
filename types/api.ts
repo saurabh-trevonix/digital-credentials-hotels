@@ -77,12 +77,10 @@ export interface QRCodeResponse {
 // Verification status types for polling
 export type VerificationStatus = 
   | 'INITIAL'           // QR displayed, waiting for scan
-  | 'SCANNED'           // QR scanned, waiting for approval
-  | 'APPROVED'          // Credentials shared successfully
-  | 'DECLINED'          // User rejected on device
-  | 'EXPIRED'           // Session expired
-  | 'FAILED'            // Any terminal error
-  | 'TIMEOUT';          // Polling timeout
+  | 'WAITING'           // QR scanned, waiting for approval
+  | 'VERIFICATION_SUCCESSFUL'  // Verification completed successfully
+  | 'VERIFICATION_FAILED'      // Verification failed
+  | 'VERIFICATION_EXPIRED';    // Session expired
 
 export interface VerificationStatusResponse {
   id: string;
