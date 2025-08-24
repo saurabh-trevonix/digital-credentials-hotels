@@ -558,22 +558,20 @@ export function HotelCheckIn() {
 
                         <div className="w-64 h-64 bg-white/95 rounded-3xl shadow-2xl mx-auto flex items-center justify-center border-4 border-gray-200">
                           {qrCodeData?.qrCodeUrl ? (
-                            <div className="text-center">
+                            <div className="w-full h-full flex items-center justify-center">
                               <img 
                                 src={qrCodeData.qrCodeUrl} 
                                 alt="Secure QR Code" 
-                                className="w-40 h-40 mx-auto mb-4 rounded-2xl shadow-lg"
+                                className="w-full h-full object-contain rounded-3xl"
                                 onError={(e) => {
                                   console.error('Failed to load QR code image:', e);
                                   showToast('error', 'Failed to load QR code image', 4000);
                                 }}
                               />
-                              <p className="text-gray-600 font-medium">Secure QR Code</p>
-                              <p className="text-gray-500 text-sm">Session: {qrCodeData.sessionId}</p>
                             </div>
                           ) : (
                             <div className="text-center">
-                              <div className="w-40 h-40 bg-gradient-to-br from-gray-800 to-black mx-auto mb-4 rounded-2xl flex items-center justify-center shadow-lg">
+                              <div className="w-40 h-40 bg-gradient-to-br from-gray-800 to-black mx-auto rounded-2xl flex items-center justify-center shadow-lg">
                                 <div className="grid grid-cols-8 gap-1">
                                   {Array.from({ length: 64 }).map((_, i) => (
                                     <motion.div 
