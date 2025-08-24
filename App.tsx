@@ -155,7 +155,7 @@ export default function App() {
                   <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
                     <Building className="w-6 h-6 text-white" />
                   </div>
-                  <span className="ml-3 text-xl font-bold text-gray-900">LuxuryHotels</span>
+                  <span className="ml-3 text-xl font-bold text-gray-900">The Grand Hotel</span>
                 </div>
 
                 {/* Primary Navigation */}
@@ -228,14 +228,14 @@ export default function App() {
             
             <div className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
               <div className="text-center mb-12">
-                <motion.h1 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="text-5xl md:text-6xl font-bold mb-6"
-                >
-                  Luxury Hotels Worldwide
-                </motion.h1>
+                                 <motion.h1 
+                   initial={{ opacity: 0, y: 20 }}
+                   animate={{ opacity: 1, y: 0 }}
+                   transition={{ duration: 0.8 }}
+                   className="text-5xl md:text-6xl font-bold mb-6"
+                 >
+                   The Grand Hotel Worldwide
+                 </motion.h1>
                 <motion.p 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -633,12 +633,12 @@ export default function App() {
                 <p className="text-lg text-gray-600 mb-8">
                   Trusted by over 2 million guests worldwide
                 </p>
-                <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-                  <div className="text-2xl font-bold text-gray-400">LUXURY</div>
-                  <div className="text-2xl font-bold text-gray-400">AWARDS</div>
-                  <div className="text-2xl font-bold text-gray-400">TRUSTED</div>
-                  <div className="text-2xl font-bold text-gray-400">GLOBAL</div>
-                </div>
+                                 <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
+                   <div className="text-2xl font-bold text-gray-400">GRAND</div>
+                   <div className="text-2xl font-bold text-gray-400">AWARDS</div>
+                   <div className="text-2xl font-bold text-gray-400">TRUSTED</div>
+                   <div className="text-2xl font-bold text-gray-400">GLOBAL</div>
+                 </div>
               </motion.div>
             </div>
           </section>
@@ -728,7 +728,7 @@ export default function App() {
               <div className="border-t border-gray-700 pt-8">
                 <div className="flex flex-col md:flex-row justify-between items-center">
                   <p className="text-gray-300 text-sm">
-                    © 2025 LuxuryHotels. All rights reserved. | 
+                    © 2025 The Grand Hotel. All rights reserved. | 
                     <a href="#" className="hover:text-white transition-colors ml-1">Sustainability</a> | 
                     <a href="#" className="hover:text-white transition-colors ml-1">Accessibility</a>
                   </p>
