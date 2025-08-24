@@ -51,19 +51,19 @@ export default function App() {
 
   // Mock data for destinations and deals
   const popularDestinations = [
-    { name: 'New York', country: 'USA', image: '/api/placeholder/300/200', rating: 4.8 },
-    { name: 'London', country: 'UK', image: '/api/placeholder/300/200', rating: 4.7 },
-    { name: 'Paris', country: 'France', image: '/api/placeholder/300/200', rating: 4.9 },
-    { name: 'Tokyo', country: 'Japan', image: '/api/placeholder/300/200', rating: 4.6 },
-    { name: 'Sydney', country: 'Australia', image: '/api/placeholder/300/200', rating: 4.5 },
-    { name: 'Dubai', country: 'UAE', image: '/api/placeholder/300/200', rating: 4.7 }
+    { name: 'New York', country: 'USA', image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=300&fit=crop&crop=center', rating: 4.8 },
+    { name: 'London', country: 'UK', image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=400&h=300&fit=crop&crop=center', rating: 4.7 },
+    { name: 'Paris', country: 'France', image: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400&h=300&fit=crop&crop=center', rating: 4.9 },
+    { name: 'Tokyo', country: 'Japan', image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=300&fit=crop&crop=center', rating: 4.6 },
+    { name: 'Sydney', country: 'Australia', image: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=400&h=300&fit=crop&crop=center', rating: 4.5 },
+    { name: 'Dubai', country: 'UAE', image: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&h=300&fit=crop&crop=center', rating: 4.7 }
   ];
 
   const topDeals = [
-    { title: 'Summer Escape Package', location: 'Caribbean', discount: '30% OFF', price: 'From $199', image: '/api/placeholder/400/250' },
-    { title: 'Business Traveler Special', location: 'Major Cities', discount: '25% OFF', price: 'From $149', image: '/api/placeholder/400/250' },
-    { title: 'Family Adventure Deal', location: 'Europe', discount: '20% OFF', price: 'From $299', image: '/api/placeholder/400/250' },
-    { title: 'Romantic Getaway', location: 'Tropical Islands', discount: '35% OFF', price: 'From $249', image: '/api/placeholder/400/250' }
+    { title: 'Summer Escape Package', location: 'Caribbean', discount: '30% OFF', price: 'From $199', image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=400&h=250&fit=crop&crop=center' },
+    { title: 'Business Traveler Special', location: 'Major Cities', discount: '25% OFF', price: 'From $149', image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=250&fit=crop&crop=center' },
+    { title: 'Family Adventure Deal', location: 'Europe', discount: '20% OFF', price: 'From $299', image: 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=400&h=250&fit=crop&crop=center' },
+    { title: 'Romantic Getaway', location: 'Tropical Islands', discount: '35% OFF', price: 'From $249', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=250&fit=crop&crop=center' }
   ];
 
   const experiences = [
@@ -459,21 +459,21 @@ export default function App() {
                     viewport={{ once: true }}
                     className="group cursor-pointer"
                   >
-                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-                      <div className="relative h-32 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                        <Building className="w-12 h-12 text-white" />
-                        <div className="absolute top-2 right-2 flex items-center space-x-1 bg-white/90 rounded-full px-2 py-1">
-                          <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                          <span className="text-xs font-medium text-gray-900">{dest.rating}</span>
-                        </div>
-                      </div>
-                      <CardContent className="p-4 text-center">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                          {dest.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">{dest.country}</p>
-                      </CardContent>
-                    </Card>
+                                         <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 ease-out group-hover:scale-105 group-hover:-translate-y-2">
+                       <div className="relative h-32 bg-cover bg-center transition-all duration-500 group-hover:scale-110" style={{ backgroundImage: `url(${dest.image})` }}>
+                         <div className="absolute inset-0 bg-black/20 transition-all duration-300 group-hover:bg-black/10"></div>
+                         <div className="absolute top-2 right-2 flex items-center space-x-1 bg-white/90 rounded-full px-2 py-1 transition-all duration-300 group-hover:bg-white group-hover:shadow-lg">
+                           <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                           <span className="text-xs font-medium text-gray-900">{dest.rating}</span>
+                         </div>
+                       </div>
+                       <CardContent className="p-4 text-center transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-blue-50 group-hover:to-indigo-50">
+                         <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-all duration-300 group-hover:scale-105">
+                           {dest.name}
+                         </h3>
+                         <p className="text-sm text-gray-600 group-hover:text-blue-500 transition-all duration-300">{dest.country}</p>
+                       </CardContent>
+                     </Card>
                   </motion.div>
                 ))}
               </div>
@@ -508,24 +508,24 @@ export default function App() {
                     viewport={{ once: true }}
                     className="group cursor-pointer"
                   >
-                    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                      <div className="relative h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                        <Building className="w-16 h-16 text-white" />
-                        <Badge className="absolute top-3 left-3 bg-red-500 text-white">
-                          {deal.discount}
-                        </Badge>
-                      </div>
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                          {deal.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-3">{deal.location}</p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-blue-600">{deal.price}</span>
-                          <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors" />
-                        </div>
-                      </CardContent>
-                    </Card>
+                                         <Card className="overflow-hidden hover:shadow-2xl transition-all duration-500 ease-out group-hover:scale-105 group-hover:-translate-y-2">
+                       <div className="relative h-48 bg-cover bg-center transition-all duration-500 group-hover:scale-110" style={{ backgroundImage: `url(${deal.image})` }}>
+                         <div className="absolute inset-0 bg-black/30 transition-all duration-300 group-hover:bg-black/20"></div>
+                         <Badge className="absolute top-3 left-3 bg-red-500 text-white transition-all duration-300 group-hover:bg-red-600 group-hover:scale-110 group-hover:shadow-lg">
+                           {deal.discount}
+                         </Badge>
+                       </div>
+                       <CardContent className="p-4 transition-all duration-300 group-hover:bg-gradient-to-br group-hover:from-blue-50 group-hover:to-indigo-50">
+                         <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-all duration-300 group-hover:scale-105">
+                           {deal.title}
+                         </h3>
+                         <p className="text-sm text-gray-600 mb-3 group-hover:text-blue-500 transition-all duration-300">{deal.location}</p>
+                         <div className="flex items-center justify-between">
+                           <span className="text-lg font-bold text-blue-600 group-hover:text-blue-700 transition-all duration-300">{deal.price}</span>
+                           <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-300" />
+                         </div>
+                       </CardContent>
+                     </Card>
                   </motion.div>
                 ))}
               </div>
