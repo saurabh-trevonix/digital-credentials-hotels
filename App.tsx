@@ -634,7 +634,7 @@ export default function App() {
                   Trusted by over 2 million guests worldwide
                 </p>
                                  <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-                   <div className="text-2xl font-bold text-gray-400">GRAND</div>
+                   <div className="text-2xl font-bold text-gray-400">LUXURY</div>
                    <div className="text-2xl font-bold text-gray-400">AWARDS</div>
                    <div className="text-2xl font-bold text-gray-400">TRUSTED</div>
                    <div className="text-2xl font-bold text-gray-400">GLOBAL</div>
