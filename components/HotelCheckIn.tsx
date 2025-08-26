@@ -366,13 +366,13 @@ export function HotelCheckIn() {
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                       <User className="w-4 h-4 text-blue-600" />
                     </div>
-                    <span className="font-medium text-gray-700">{verificationData?.name}</span>
+                    <span className="font-medium text-gray-700">Name: {verificationData?.name}</span>
                   </div>
-                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
-                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <div className="flex items-start gap-3 p-3 bg-white rounded-lg shadow-sm">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
                       <MapPin className="w-4 h-4 text-purple-600" />
                     </div>
-                    <span className="text-gray-700">{verificationData?.address}</span>
+                    <span className="text-gray-700 text-left">Address: {verificationData?.address}</span>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm">
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
