@@ -6,7 +6,7 @@ import { ToastContainer } from '@/components/ui/toast'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'AI Hotel Digital ID Check-in System',
+  title: 'The Grand Hotel',
   description: 'Experience the future of hospitality with secure, contactless check-in using Verifiable Credentials and biometric authentication',
 }
 
