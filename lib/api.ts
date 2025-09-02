@@ -94,7 +94,7 @@ export async function createPresentationRequest(
   
   const presentationRequest: PresentationRequest = {
     message,
-    protocol: 'NATIVE',
+    protocol: 'OPENID4VP',
     digitalWalletApplication: {
       id: '428b26a1-8833-43de-824b-f1ed336c6245'
     },
@@ -103,7 +103,12 @@ export async function createPresentationRequest(
         type: 'Your Digital ID from NatWest',
         keys: []
       }
-    ]
+    ],
+    issuerFilter: {
+      dids: [
+        `did:web:auth.pingone.com:${API_CONFIG.pingOne.environmentId}:issuer`
+      ]
+    }
   };
 
   try {
