@@ -40,7 +40,8 @@ export interface PresentationRequest {
     keys: string[];
   }>;
   issuerFilter?: {
-    dids: string[];
+    dids?: string[];
+    environmentIds?: string[];
   };
 }
 

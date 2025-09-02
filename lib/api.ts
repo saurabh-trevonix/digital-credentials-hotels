@@ -1,4 +1,4 @@
-// API utilities for PingOne integration
+﻿// API utilities for PingOne integration
 import type { 
   PingOneTokenResponse, 
   PresentationRequest, 
@@ -103,13 +103,23 @@ export async function createPresentationRequest(
         type: 'Your Digital ID from NatWest',
         keys: []
       }
-    ],
-    issuerFilter: {
-      dids: [
-        `did:web:auth.pingone.com:${API_CONFIG.pingOne.environmentId}:issuer`
-      ]
-    }
+    ]
   };
+
+  // Build issuerFilter dynamically from config to avoid unintended failures
+  const configuredFilter = API_CONFIG.pingOne.issuerFilter || {};
+  const dids = (configuredFilter.dids || []).filter(Boolean);
+  const envIds = (configuredFilter.environmentIds || []).filter(Boolean);
+
+  if (dids.length > 0 || envIds.length > 0) {
+    presentationRequest.issuerFilter = {};
+    if (dids.length > 0) {
+      presentationRequest.issuerFilter.dids = dids;
+    }
+    if (envIds.length > 0) {
+      presentationRequest.issuerFilter.environmentIds = envIds;
+    }
+  }
 
   try {
     const controller = new AbortController();
@@ -203,7 +213,7 @@ export async function getCredentialData(
   const credentialUrl = `${API_CONFIG.pingOne.apiPath}/environments/${environmentId}/presentationSessions/${credentialVerificationId}/credentialData`;
   
   // Log the request details for debugging
-  console.log('🔍 Fetching credential data with:', {
+  console.log('dY"? Fetching credential data with:', {
     url: credentialUrl,
     environmentId,
     credentialVerificationId,
@@ -226,7 +236,7 @@ export async function getCredentialData(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Credential data request failed:', {
+      console.error('�?O Credential data request failed:', {
         status: response.status,
         statusText: response.statusText,
         url: credentialUrl,
@@ -238,7 +248,7 @@ export async function getCredentialData(
     const data = await response.json();
     
     // Log the raw response for debugging
-    console.log('📥 Raw credential data response:', JSON.stringify(data, null, 2));
+    console.log('dY"� Raw credential data response:', JSON.stringify(data, null, 2));
     
     // More flexible validation - check for different possible response structures
     const hasValidStructure = 
@@ -249,7 +259,7 @@ export async function getCredentialData(
       (data.output?.credentials);
     
     if (!hasValidStructure) {
-      console.error('❌ Invalid credential data response structure:', {
+      console.error('�?O Invalid credential data response structure:', {
         receivedData: data,
         expectedPaths: [
           'sessionData.credentialsDataList',
@@ -265,28 +275,27 @@ export async function getCredentialData(
       throw new Error('Invalid credential data response: missing required fields. Check console for response structure details.');
     }
 
-    console.log('✅ Credential data response validation passed');
+    console.log('�o. Credential data response validation passed');
     return data as CredentialDataResponse;
   } catch (error) {
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
-        console.error('⏰ Credential data request timed out after', API_TIMEOUTS.pingOne, 'ms');
+        console.error('�?� Credential data request timed out after', API_TIMEOUTS.pingOne, 'ms');
         throw new Error('Credential data request timed out');
       }
-      console.error('❌ Error in getCredentialData:', error.message);
+      console.error('�?O Error in getCredentialData:', error.message);
       throw new Error(`Failed to get credential data: ${error.message}`);
     }
-    console.error('❌ Unknown error in getCredentialData:', error);
+    console.error('�?O Unknown error in getCredentialData:', error);
     throw new Error('Failed to get credential data: Unknown error');
   }
 }
-
 // Flatten credential data into the required format
 export function flattenCredentialData(credentialData: CredentialDataResponse): FlattenedCredentialData {
   const flattenedData: FlattenedCredentialData = {};
   
   try {
-    console.log('🔄 Flattening credential data from structure:', {
+    console.log('ðŸ”„ Flattening credential data from structure:', {
       hasSessionData: !!credentialData.sessionData,
       hasCredentialsDataList: !!credentialData.sessionData?.credentialsDataList,
       credentialsCount: credentialData.sessionData?.credentialsDataList?.length || 0
@@ -296,15 +305,15 @@ export function flattenCredentialData(credentialData: CredentialDataResponse): F
     const credentials = credentialData.sessionData?.credentialsDataList || [];
     
     if (credentials.length === 0) {
-      console.warn('⚠️ No credentials found in sessionData.credentialsDataList');
-      console.log('🔍 Available keys in credentialData:', Object.keys(credentialData));
+      console.warn('âš ï¸ No credentials found in sessionData.credentialsDataList');
+      console.log('ðŸ” Available keys in credentialData:', Object.keys(credentialData));
       return {};
     }
     
-    console.log(`📊 Processing ${credentials.length} credentials:`, credentials);
+    console.log(`ðŸ“Š Processing ${credentials.length} credentials:`, credentials);
     
     credentials.forEach((credential, index) => {
-      console.log(`🔍 Processing credential ${index + 1}:`, credential);
+      console.log(`ðŸ” Processing credential ${index + 1}:`, credential);
       
       // Use the credential type as the key
       const credentialName = credential.type || `credential_${index}`;
@@ -331,18 +340,18 @@ export function flattenCredentialData(credentialData: CredentialDataResponse): F
           userInfo
         };
         
-        console.log(`✅ Flattened credential "${credentialName}":`, flattenedData[credentialName]);
-        console.log(`👤 Extracted user info:`, userInfo);
+        console.log(`âœ… Flattened credential "${credentialName}":`, flattenedData[credentialName]);
+        console.log(`ðŸ‘¤ Extracted user info:`, userInfo);
       } else {
-        console.warn(`⚠️ Skipping credential ${index + 1} - no type found:`, credential);
+        console.warn(`âš ï¸ Skipping credential ${index + 1} - no type found:`, credential);
       }
     });
     
-    console.log('🎯 Final flattened credential data:', flattenedData);
+    console.log('ðŸŽ¯ Final flattened credential data:', flattenedData);
     return flattenedData;
   } catch (error) {
-    console.error('❌ Error flattening credential data:', error);
-    console.error('🔍 Credential data that caused error:', credentialData);
+    console.error('âŒ Error flattening credential data:', error);
+    console.error('ðŸ” Credential data that caused error:', credentialData);
     return {};
   }
 }
@@ -402,14 +411,14 @@ function extractUserInfo(data: Record<string, string>) {
           userInfo.age = age;
         }
       } catch {
-        console.warn('⚠️ Could not parse birthdate:', birthdateStr);
+        console.warn('âš ï¸ Could not parse birthdate:', birthdateStr);
       }
     }
     
-    console.log('👤 Extracted user information:', userInfo);
+    console.log('ðŸ‘¤ Extracted user information:', userInfo);
     return userInfo;
   } catch (error) {
-    console.error('❌ Error extracting user info:', error);
+    console.error('âŒ Error extracting user info:', error);
     return userInfo;
   }
 }
@@ -473,8 +482,8 @@ export async function checkVerificationStatus(
 
     // If verification is successful, fetch credential data in parallel
     if (data.status === 'VERIFICATION_SUCCESSFUL') {
-      console.log('🎉 Verification successful! Fetching credential data...');
-      console.log('📋 Session details:', {
+      console.log('ðŸŽ‰ Verification successful! Fetching credential data...');
+      console.log('ðŸ“‹ Session details:', {
         sessionId: data.id,
         environmentId: data.environment?.id,
         createdAt: data.createdAt,
@@ -484,25 +493,25 @@ export async function checkVerificationStatus(
       // Make parallel call to get credential data
       getCredentialData(accessToken, environmentId, sessionId)
         .then((credentialResponse) => {
-          console.log('✅ Credential data API call successful');
-          console.log('📥 Credential data API response:', credentialResponse);
+          console.log('âœ… Credential data API call successful');
+          console.log('ðŸ“¥ Credential data API response:', credentialResponse);
           
           // Check if we got VERIFICATION_SUCCESSFUL from the credential data
           const verificationStatus = credentialResponse.status || 
                                    'Status not found in expected location';
-          console.log('🔍 Credential verification status:', verificationStatus);
+          console.log('ðŸ” Credential verification status:', verificationStatus);
           
           // Flatten the credential data
           const flattenedCredentialData = flattenCredentialData(credentialResponse);
-          console.log('📊 Flattened credential data:', flattenedCredentialData);
+          console.log('ðŸ“Š Flattened credential data:', flattenedCredentialData);
           
           // Log the flattened data in the required format
-          console.log('🎯 Credential data in required format:');
+          console.log('ðŸŽ¯ Credential data in required format:');
           if (Object.keys(flattenedCredentialData).length === 0) {
-            console.warn('⚠️ No credentials were flattened - check the response structure above');
+            console.warn('âš ï¸ No credentials were flattened - check the response structure above');
           } else {
             Object.entries(flattenedCredentialData).forEach(([credentialName, data]) => {
-              console.log(`📋 ${credentialName}:`, {
+              console.log(`ðŸ“‹ ${credentialName}:`, {
                 id: data.id,
                 type: data.type,
                 verificationStatus: data.verificationStatus,
@@ -514,8 +523,8 @@ export async function checkVerificationStatus(
           }
         })
         .catch((error) => {
-          console.error('❌ Error fetching credential data:', error);
-          console.error('🔍 Error details:', {
+          console.error('âŒ Error fetching credential data:', error);
+          console.error('ðŸ” Error details:', {
             message: error.message,
             stack: error.stack,
             sessionId,
@@ -533,10 +542,10 @@ export async function checkVerificationStatus(
         const firstCredential = Object.values(flattenedCredentialData)[0];
         if (firstCredential?.userInfo) {
           extractedUserInfo = firstCredential.userInfo;
-          console.log('👤 Extracted user info for UI:', extractedUserInfo);
+          console.log('ðŸ‘¤ Extracted user info for UI:', extractedUserInfo);
         }
       } catch (credentialError) {
-        console.error('❌ Error fetching credential data for UI:', credentialError);
+        console.error('âŒ Error fetching credential data for UI:', credentialError);
       }
     }
 

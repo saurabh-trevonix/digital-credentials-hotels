@@ -7,7 +7,18 @@ export const API_CONFIG = {
     clientSecret: 'vUk-gCakP-5k5g_Lzt.N~sazuIXx4VeITHXnigZTZLJNlptvFCupSjBQT3KxEAGo',
     baseUrl: 'https://auth.pingone.eu',
     apiPath: 'https://api.pingone.eu/v1',
-    populationId: 'b530a0ee-64cf-4411-8e42-2659c01c7459'
+    populationId: 'b530a0ee-64cf-4411-8e42-2659c01c7459',
+    // Optional: restrict verification to specific issuers.
+    // For PingOne-issued JWT-VCs, prefer environmentIds.
+    // For non-PingOne issuers, use dids (did:web, did:jwk, did:ion long-form).
+    issuerFilter: {
+      // Example allow-lists (leave empty to accept any issuer while testing):
+      // environmentIds: ['fd4cecf9-f6b6-45da-a0c3-2f8af9874182'],
+      // dids: ['did:web:example.com:issuer']
+    } as {
+      environmentIds?: string[];
+      dids?: string[];
+    }
   },
   pingDaVinci: {
     // Placeholder for PingDaVinci configuration
