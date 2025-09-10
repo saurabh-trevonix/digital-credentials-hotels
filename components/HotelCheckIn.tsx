@@ -184,7 +184,7 @@ export function HotelCheckIn() {
     
     try {
       // Step 1: Get access token from PingOne
-      console.log('Getting access token from PingOne...');
+      console.log('Getting access token...');
       const tokenResponse = await getPingOneAccessToken();
       setAccessToken(tokenResponse.access_token);
       
@@ -194,10 +194,10 @@ export function HotelCheckIn() {
         scope: tokenResponse.scope
       });
       
-      showToast('success', 'Successfully authenticated with PingOne!', 4000);
+      showToast('success', 'Successfully authenticated!', 4000);
       
       // Step 2: Generate QR code via presentation request
-      console.log('Creating presentation request to generate QR code...');
+      console.log('Generating QR code...');
       const qrResponse = await generateQRCode(tokenResponse.access_token);
       setQrCodeData(qrResponse);
       
@@ -487,7 +487,7 @@ export function HotelCheckIn() {
                         {accessToken && (
                           <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3 mb-4">
                             <p className="text-green-300 text-sm">
-                              ✅ PingOne authentication successful
+                              ✅ Authentication successful
                             </p>
                           </div>
                         )}
@@ -512,9 +512,9 @@ export function HotelCheckIn() {
                         
                         {isGeneratingQR && (
                           <div className="text-blue-200 text-sm">
-                            <p>🔐 Authenticating with PingOne...</p>
-                            <p>📱 Creating presentation request...</p>
-                            <p>🔄 Generating secure QR code...</p>
+                            <p>🔐 Authenticating...</p>
+                            <p>📱 Generating QR code...</p>
+                            <p>🔄 Preparing check-in...</p>
                           </div>
                         )}
                       </motion.div>

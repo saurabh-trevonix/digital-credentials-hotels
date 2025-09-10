@@ -185,13 +185,13 @@ export async function createPresentationRequest(
   }
 }
 
-// QR Code generation using PingOne presentation request
+// QR Code generation using presentation request
 export async function generateQRCode(accessToken: string): Promise<QRCodeResponse> {
   try {
-    console.log('Creating presentation request to generate QR code...');
+    console.log('Generating QR code...');
     const qrResponse = await createPresentationRequest(accessToken);
     
-    console.log('Successfully generated QR code:', {
+    console.log('QR code generated successfully:', {
       sessionId: qrResponse.sessionId,
       status: qrResponse.status,
       qrCodeUrl: qrResponse.qrCodeUrl

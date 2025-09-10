@@ -27,9 +27,10 @@ function ToastItem({ toast, onRemove }: ToastProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -50, scale: 0.9 }}
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -50, scale: 0.9 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       className={`
         relative flex items-center gap-3 p-4 rounded-lg shadow-lg border-l-4 min-w-[300px] max-w-[400px]
         ${toast.type === 'success' 
@@ -61,15 +62,17 @@ function ToastItem({ toast, onRemove }: ToastProps) {
 }
 
 export function ToastContainer() {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+  const [currentToast, setCurrentToast] = useState<Toast | null>(null);
 
   const addToast = (toast: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substr(2, 9);
-    setToasts(prev => [...prev, { ...toast, id }]);
+    // Replace current toast instead of adding to array
+    setCurrentToast({ ...toast, id });
   };
 
   const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
+    // Only remove if it's the current toast
+    setCurrentToast(prev => prev?.id === id ? null : prev);
   };
 
   // Expose addToast globally for use in other components
@@ -81,15 +84,15 @@ export function ToastContainer() {
   }, []);
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
-      <AnimatePresence>
-        {toasts.map(toast => (
+    <div className="fixed top-4 right-4 z-50">
+      <AnimatePresence mode="wait">
+        {currentToast && (
           <ToastItem
-            key={toast.id}
-            toast={toast}
+            key={currentToast.id}
+            toast={currentToast}
             onRemove={removeToast}
           />
-        ))}
+        )}
       </AnimatePresence>
     </div>
   );
